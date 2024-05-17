@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Pesanan - TOKOSz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #121212;
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0px;
+        }
+
+        h1 {
+            color: #00bcd4;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .table-container {
+            width: 100%;
+            max-width: 800px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            background-color: #1e1e1e;
+            border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        th, td {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            text-align: left;
+        }
+
+        th {
+            background-color: #333;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        tr:nth-child(even) {
+            background-color: #292929;
+        }
+
+        .search-container {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .search-container input[type=text] {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            margin-right: 10px;
+        }
+
+        .search-container button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #00bcd4;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        /* Penanda warna status */
+        .status-belum-selesai {
+            background-color: #ff6666; /* Merah untuk status 'Belum Selesai' */
+            color: #fff;
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+
+        .status-selesai {
+            background-color: #66ff66; /* Hijau untuk status 'Selesai' */
+            color: #000;
+            border-radius: 5px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Riwayat Pesanan</h1>
+
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Cari nomor telepon...">
+        <button onclick="searchOrders()"><i class="fas fa-search"></i> Cari</button>
+    </div>
+
+    <div class="table-container">
+        <table id="orderTable">
+            <thead>
+                <tr>
+                    <th>E-Wallet</th>
+                    <th>Jumlah</th>
+                    <th>Nomor Akun</th>
+                    <th>Status</th>
+                    <th>Tanggal</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data riwayat pesanan akan ditampilkan di sini -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-firestore.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "konter-e465d.firebaseapp.com",
+            projectId: "konter-e465d",
+            storageBucket: "konter-e465d.appspot.com",
+            messagingSenderId: "1033277565037",
+            appId: "1:1033277565037:web:8e4f9560b1e70a13c57764",
+            measurementId: "G-VYPRYTSB81"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Fetch Orders from Firestore
+        db.collection('orders').orderBy('timestamp', 'desc').get().then((querySnapshot) => {
+            const orderTable = document.getElementById('orderTable');
+            const tbody = orderTable.querySelector('tbody');
+            tbody.innerHTML = ''; // Clear existing table rows
+
+            querySnapshot.forEach((doc) => {
+                const order = doc.data();
+                const status = order.status ? order.status : 'Belum Selesai';
+                const statusClass = status === 'Belum Selesai' ? 'status-belum-selesai' : 'status-selesai';
+                const row = `
+                    <tr>
+                        <td>${order.ewallet}</td>
+                        <td>Rp${parseInt(order.amount).toLocaleString()}</td>
+                        <td>${order.accountNumber}</td>
+                        <td class="${statusClass}">${status}</td>
+                        <td>${order.timestamp.toDate().toLocaleString()}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        });
+
+        // Function to search orders
+        function searchOrders() {
+            const searchInput = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.getElementById('orderTable').getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                const td = rows[i].getElementsByTagName('td')[2]; // Search in the third column (Nomor Akun)
+                if (td) {
+                    const txtValue = td.textContent || td.innerText;
+                    if (txtValue.toLowerCase().indexOf(searchInput) > -1) {
+                        rows[i].style.display = "";
+                    } else {
+                        rows[i].style.display = "none";
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>
