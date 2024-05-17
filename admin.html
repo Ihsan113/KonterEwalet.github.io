@@ -1,0 +1,284 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - TOKOSz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #121212;
+            color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;            
+            margin: 0;
+            padding: 0px;
+        }
+
+        h1 {
+            color: #00bcd4;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .order-list {
+            width: 100%;
+            max-width: 400px;            
+            background-color: #1e1e1e;
+            padding: 0px;            
+            border-radius: 10px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+        }
+
+        .order-item {
+            padding: 10px;
+            border-bottom: 5px solid red; /* Default to red for 'Belum Selesai' */
+            background-color: #292929;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            position: relative; /* Add this for positioning the image */
+        }
+
+        .order-item.selesai {
+            border-bottom-color: green;
+        }
+
+        .order-item p {
+            margin: 5px 0;
+        }
+
+        .status-container {
+            margin-top: 10px;
+        }
+
+        .status-container select,
+        .status-container button {
+            margin-right: 10px;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .status-container select {
+            background-color: #333;
+            color: #e2e8f0;
+        }
+
+        .status-container button {
+            background-color: #00bcd4;
+            color: #fff;
+        }
+
+        .proof-image {
+            position: absolute; /* Position the image within the card */
+            top: 10px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            
+            object-fit: cover;
+            border-radius: 5px;
+            cursor: pointer; /* Indicate the image is clickable */
+        }
+
+        .delete-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            color: red;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            padding-top: 60px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 700px;
+        }
+
+        .modal-content, .proof-image {
+            -webkit-animation-name: zoom;
+            -webkit-animation-duration: 0.6s;
+            animation-name: zoom;
+            animation-duration: 0.6s;
+        }
+
+        @-webkit-keyframes zoom {
+            from {-webkit-transform: scale(0)} 
+            to {-webkit-transform: scale(1)}
+        }
+
+        @keyframes zoom {
+            from {transform: scale(0)} 
+            to {transform: scale(1)}
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #fff;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>Admin Panel - Orders</h1>
+    <div class="order-list" id="orderList">
+        <!-- Orders will be populated here -->
+    </div>
+
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <span class="close">&times;</span>
+        <img class="modal-content" id="img01">
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-storage.js"></script>
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "konter-e465d.firebaseapp.com",
+            projectId: "konter-e465d",
+            storageBucket: "konter-e465d.appspot.com",
+            messagingSenderId: "1033277565037",
+            appId: "1:1033277565037:web:8e4f9560b1e70a13c57764",
+            measurementId: "G-VYPRYTSB81"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // Fetch Orders from Firestore
+        db.collection('orders').orderBy('timestamp', 'desc').onSnapshot((snapshot) => {
+            const orderList = document.getElementById('orderList');
+            orderList.innerHTML = ''; // Clear existing orders
+
+            snapshot.forEach((doc) => {
+                const order = doc.data();
+                const orderItem = document.createElement('div');
+                orderItem.classList.add('order-item');
+                orderItem.classList.toggle('selesai', order.status === 'Selesai');
+                
+                orderItem.innerHTML = `
+                    <p><strong>E-Wallet:</strong> ${order.ewallet}</p>
+                    <p><strong>Amount:</strong> Rp${parseInt(order.amount).toLocaleString()}</p>
+                    <p><strong>Admin Fee:</strong> Rp${order.adminFee.toLocaleString()}</p>
+                    <p><strong>Total Amount:</strong> Rp${order.totalAmount.toLocaleString()}</p>
+                    <p><strong>Account Number:</strong> ${order.accountNumber}</p>
+                    <p><strong>Date:</strong> ${order.timestamp.toDate().toLocaleString()}</p>
+                    <img src="${order.proof_url}" alt="Proof Image" class="proof-image" />
+                   <button class="delete-button" data-id="${doc.id}" data-url="${order.proof_url}">
+    <i class="fas fa-trash"></i>
+</button>
+                    <div class="status-container">
+                        <select class="status-select">
+                            <option value="Belum Selesai" ${order.status === 'Belum Selesai' ? 'selected' : ''}>Belum Selesai</option>
+                            <option value="Selesai" ${order.status === 'Selesai' ? 'selected' : ''}>Selesai</option>
+                        </select>
+                        <button class="save-button" data-id="${doc.id}">Simpan</button>
+                    </div>
+                `;
+                orderList.appendChild(orderItem);
+
+                // Add event listener for the save button
+                orderItem.querySelector('.save-button').addEventListener('click', (e) => {
+                    const orderId = e.target.getAttribute('data-id');
+                    const newStatus = orderItem.querySelector('.status-select').value;
+                    db.collection('orders').doc(orderId).update({
+                        status: newStatus
+                    }).then(() => {
+                        console.log(`Order ${orderId} updated to ${newStatus}`);
+                    }).catch((error) => {
+                        console.error("Error updating order: ", error);
+                    });
+                });
+
+                // Add event listener for the delete button
+                orderItem.querySelector('.delete-button').addEventListener('click', (e) => {
+    const button = e.currentTarget;
+    const orderId = button.getAttribute('data-id');
+    const proofUrl = button.getAttribute('data-url');
+
+    if (orderId) {
+        // Delete the order from Firestore
+        db.collection('orders').doc(orderId).delete().then(() => {
+            console.log(`Order ${orderId} deleted from Firestore`);
+
+            // Delete the image from Firebase Storage
+            if (proofUrl) {
+                const storageRef = storage.refFromURL(proofUrl);
+                storageRef.delete().then(() => {
+                    console.log('Image deleted from Storage');
+                }).catch((error) => {
+                    console.error('Error deleting image: ', error);
+                });
+            }
+        }).catch((error) => {
+            console.error("Error deleting order: ", error);
+        });
+    } else {
+        console.error('Error: orderId is null');
+    }
+});
+
+                // Add event listener for the proof image
+                const proofImage = orderItem.querySelector('.proof-image');
+                proofImage.addEventListener('click', () => {
+                    const modal = document.getElementById('myModal');
+                    const modalImg = document.getElementById("img01");
+                    modal.style.display = "block";
+                    modalImg.src = proofImage.src;
+                });
+            });
+
+            // Get the modal
+            const modal = document.getElementById('myModal');
+            const span = document.getElementsByClassName("close")[0];
+
+            // When the user clicks on <span> (x), close the modal
+            span.onclick = function() { 
+                modal.style.display = "none";
+            }
+        });
+    </script>
+</body>
+</html>
+
