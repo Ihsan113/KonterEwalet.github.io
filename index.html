@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jasa Transfer E-Wallet - TOKOSz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- Tambahkan tautan skrip Toastify -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #121212;
+            color: #e2e8f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+        }
+
+        .container:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.7);
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .header i {
+            font-size: 30px;
+            color: #00bcd4;
+            margin-right: 10px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin: 0;
+            color: #00bcd4;
+        }
+
+        .top-text {
+            position: block;            
+            margin-left: 50%;
+            margin-top: -55px;
+            transform: translateX(-50%);           
+            padding: 10px;
+            width: 80%;
+            border-radius: 10px;
+            font-size: 18px;
+            margin-bottom: 2px;
+            color: #40a1ff;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        label {
+            text-align: left;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: white;
+        }
+
+        input, select {
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            font-size: 16px;
+            background-color: #2b2b2b;
+            color: white;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: #00bcd4;
+            outline: none;
+        }
+
+        button {
+            padding: 12px;
+            background-color: #00bcd4;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #008ba3;
+        }
+
+        #result {
+            margin-top: 25px;
+            font-size: 18px;
+            color: #e2e8f0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #2b2b2b;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            text-align: left;
+            color: #e2e8f0;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .close {
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal-body img {
+            width: 100%;
+            max-width: 300px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 20px;
+            color: #00bcd4;
+        }
+
+        .loader {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #00bcd4; /* Blue */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* CSS untuk animasi garis */
+        .toastify-line {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #fff;
+            animation: lineAnimation 3s linear forwards;
+        }
+
+        @keyframes lineAnimation {
+            from {
+                width: 0;
+            }
+            to {
+                width: 100%;
+            }
+        }
+
+ /* CSS untuk teks di luar card */
+        .trusted-text {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #1e1e1e;
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            font-size: 18px;
+            color: #40a1ff;
+            font-weight: bold;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .trusted-text i {
+            margin-right: 10px;
+            color: #00bcd4;
+        }
+
+        .history-button {
+            background: none;
+            border: none;
+            color: #00bcd4;
+            font-size: 24px;
+            margin-left: 20px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .history-button:hover {
+            color: #008ba3;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="container">
+       
+       
+        <div class="top-text">
+             <div class="header">
+            <i class="fas fa-store"></i>
+            <h1>TOKOSz</h1>
+        </div>
+        
+            <i class="fas fa-shield-alt"></i> Tools jasa transfer, Top up ewalet murah, Open!</div>
+        
+        <form id="transferForm">
+            <label for="ewallet">Pilih E-Wallet:</label>
+            <select id="ewallet" name="ewallet" required>
+                <option value="dana">Dana</option>
+                <option value="ovo">OVO</option>
+                <option value="gopay">GoPay</option>
+                <option value="shopeepay">ShopeePay</option>
+            </select>
+
+            <label for="amount">Jumlah Transfer:</label>
+            <input type="number" id="amount" name="amount" required min="1000" placeholder="Masukkan jumlah transfer">
+
+            <label for="accountNumber">Nomor Akun:</label>
+            <input type="text" id="accountNumber" name="accountNumber" required placeholder="Masukkan nomor akun">
+
+            <button type="submit" id="transferButton">Cek Dulu</button>
+            
+        </form>
+        
+        <div id="result" class="loading">Memproses...</div>
+       <div class="trusted-text">
+            <i class="fas fa-shield-alt"></i>
+            100% Aman Terpercaya, Progres 2-5 menit⏰
+            <button class="history-button" onclick="window.location.href='history.html'">
+                <i class="fas fa-history"></i>
+            </button>
+        </div>
+    </div>
+
+    
+    <div class="modal" id="resultModal">
+        <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h2>Informasi Transfer</h2>
+                <span class="close" id="closeModal">&times;</span>
+            </div>
+            
+            
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <!-- Loading Animation with Percentage -->
+                <div id="loadingAnimation" class="loading">
+                    <div class="loader"></div>
+                    <p id="loadingText">Mengirim...</p>
+                    <p id="loadingPercentage"></p>
+                </div>
+
+                <!-- Transfer Information -->
+                <div id="transferInfoContainer">
+                    <p id="transferInfo"></p>
+                    <p id="proof2">Scan QR berikut untuk pembayaran:</p>
+                    <img id="gambar" src="https://i.ibb.co/DVm9ByN/Screenshot-20240517-191225-DANA-1.png" alt="Gambar Contoh">
+
+                    <label for="proof">Unggah Bukti Transfer:</label>
+                    <input type="file" id="proof" name="proof" accept="image/*">
+                </div>
+
+                <!-- Total Amount -->
+                <p id="totalAmount" style="display: none;"></p>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <button id="sendButton">Kirim</button>
+                
+            </div>
+        </div>
+        
+    </div>
+
+
+
+ 
+
+   
+        <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+        
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-firestore.js"></script>
+    <!-- Tambahkan skrip Toastify -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "konter-e465d.firebaseapp.com",
+            projectId: "konter-e465d",
+            storageBucket: "konter-e465d.appspot.com",
+            messagingSenderId: "1033277565037",
+            appId: "1:1033277565037:web:8e4f9560b1e70a13c57764",
+            measurementId: "G-VYPRYTSB81"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // Load EmailJS SDK
+        emailjs.init("m_cJTc3CBeWJutcZS");
+
+        // Submit Form Event Listener
+        document.getElementById('transferForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent default form behavior
+
+            const ewallet = document.getElementById('ewallet').value;
+            const amount = document.getElementById('amount').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+
+            // Calculate total amount including admin fee
+            const adminFee = 750;
+            const totalAmount = parseInt(amount) + adminFee;
+
+            const resultDiv = document.getElementById('result');
+            const modal = document.getElementById('resultModal');
+            const transferInfo = document.getElementById('transferInfo');
+            
+
+            // Show Loading Animation
+            resultDiv.style.display = 'block';
+
+            // Simulate data sending to the server and show modal
+            setTimeout(() => {
+                // Hide Loading Animation
+                resultDiv.style.display = 'none';
+
+                // Populate modal with transfer information
+                transferInfo.innerHTML = `
+                    <p>Transfer to ${ewallet.toUpperCase()}</p>
+                    <p>Amount: Rp${parseInt(amount).toLocaleString()}</p>
+                    <p>Admin Fee: Rp${adminFee.toLocaleString()}</p>
+                    <p>Account Number: ${accountNumber}</p>
+                    <hr>
+                    <p>Salin dan bayar sesuai nilai</p>
+                    <p id="totalAmount">Total Amount: Rp${totalAmount.toLocaleString()}
+                        <button onclick="copyTotalAmount()">
+                            <i class="fas fa-copy"></i> Salin
+                        </button>
+                    </p>
+                `;
+
+               
+                // Show modal
+                modal.style.display = 'flex';
+            }, 2000);
+        });
+
+        // Add event listener for the send button
+        document.getElementById('sendButton').addEventListener('click', function() {
+            const ewallet = document.getElementById('ewallet').value;
+            const amount = document.getElementById('amount').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+            const proof = document.getElementById('proof').files[0];
+
+            // Check if proof is uploaded
+            if (!proof) {
+                Toastify({
+                    text: "Please upload proof of transfer.",
+                    duration: 3000,
+                    close: true,
+                    gravity: "bottom",
+                    position: "right",
+                    backgroundColor: "linear-gradient(to right, #ff416c, #ff4b2b)",
+                }).showToast();
+                return;
+            }
+
+            // Disable the send button to prevent spam clicks
+            disableSendButton();
+
+            // Show modal
+            document.getElementById('resultModal').style.display = 'flex';
+
+            // Hide transfer information and show loading animation
+            document.getElementById('transferInfoContainer').style.display = 'none';
+            document.getElementById('loadingAnimation').style.display = 'block';
+
+            // Firebase Firestore Reference
+            const orderData = {
+                ewallet,
+                amount,
+                adminFee: 750,
+                totalAmount: parseInt(amount) + 500,
+                accountNumber,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            // Add data to Firestore
+            db.collection('orders').add(orderData)
+                .then((docRef) => {
+                    console.log("Order added to Firestore with ID: ", docRef.id);
+
+                    // Firebase Storage Reference
+                    const storageRef = firebase.storage().ref();
+                    const proofRef = storageRef.child(`proofs/${proof.name}`);
+
+                    // Upload proof to Firebase Storage
+                    const uploadTask = proofRef.put(proof);
+
+                    // Track upload progress
+                    uploadTask.on('state_changed', function(snapshot) {
+                        // Calculate upload progress percentage
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        // Update loading percentage text
+                        document.getElementById('loadingPercentage').innerText = `Upload Progress: ${progress.toFixed(2)}%`;
+                    }, function(error) {
+                        // Handle errors during upload                
+                        alert('Failed to upload proof of transfer. Please try again.');
+                        // Hide loading animation and show transfer information
+                        document.getElementById('loadingAnimation').style.display = 'none';
+                        document.getElementById('transferInfoContainer').style.display = 'block';
+                        // Hide modal
+                        document.getElementById('resultModal').style.display = 'none';
+                        // Re-enable the send button
+                        enableSendButton();
+                    }, function() {
+                        // Handle successful upload
+                        // Get download URL of uploaded proof
+                        uploadTask.snapshot.ref.getDownloadURL().then(url => {
+                            // Update Firestore with proof URL
+                            db.collection('orders').doc(docRef.id).update({
+                                proof_url: url
+                            }).then(() => {
+                                console.log("Order updated with proof URL");
+
+                                // Hide loading animation and show success message
+                                document.getElementById('loadingAnimation').style.display = 'none';
+                                document.getElementById('transferInfoContainer').style.display = 'block';
+                                document.getElementById('transferInfo').innerHTML = `
+                                    <p>Transfer to ${ewallet.toUpperCase()} successful!</p>
+                                    <p>Amount: Rp${parseInt(amount).toLocaleString()}</p>
+                                    <p>Admin Fee: Rp750</p>
+                                    <p>Total Amount: Rp${(parseInt(amount) + 750).toLocaleString()}</p>
+                                    <p>Account Number: ${accountNumber}</p>
+                                    <p>cukup klik 1 kali aja</p>
+                                    <button id="bellButton" onclick="sendNotification()">🔔 Send Notification</button>
+                                    <p>Klik lonceng Biar Transaksi Kamu Di proses</p>
+                                    <hr>
+                                `;
+                   
+                  document.querySelector('label[for="proof"]').style.display = 'none';
+         
+                                
+document.getElementById('proof2').style.display = 'none';
+
+document.getElementById('proof').style.display = 'none';
+                                // Hide QR image
+            
+document.getElementById('gambar').style.display = 'none';
+                                // Hide send button
+                                document.getElementById('sendButton').style.display = 'none';
+                            }).catch(error => {
+                                console.error("Error updating order with proof URL: ", error);
+                                // Re-enable the send button
+                                enableSendButton();
+                            });
+                        });
+                    });
+                })
+                .catch((error) => {
+                    console.error("Error adding order to Firestore: ", error);
+                                    // Show error message or perform other actions
+                    enableSendButton();
+                });
+        });
+
+        // Function to disable send button
+        function disableSendButton() {
+            const sendButton = document.getElementById('sendButton');
+            sendButton.disabled = true;
+            sendButton.innerHTML = 'Sending... <i class="fas fa-spinner fa-spin"></i>';
+        }
+
+        // Function to enable send button
+        function enableSendButton() {
+            const sendButton = document.getElementById('sendButton');
+            sendButton.disabled = false;
+            sendButton.innerHTML = 'Send Proof';
+        }
+
+        // Function to disable bell button and show loading animation
+        function disableBellButton() {
+            const bellButton = document.getElementById('bellButton');
+            bellButton.disabled = true;
+            bellButton.innerHTML = 'Sending... <i class="fas fa-spinner fa-spin"></i>';
+        }
+
+        // Function to enable bell button and reset to default state
+        function enableBellButton() {
+            const bellButton = document.getElementById('bellButton');
+            bellButton.disabled = false;
+            bellButton.innerHTML = '🔔 Send Notification';
+        }
+
+        // Function to send notification
+        function sendNotification() {
+            const ewallet = document.getElementById('ewallet').value;
+            const amount = document.getElementById('amount').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+
+            // Disable the bell button to prevent multiple notifications
+            disableBellButton();
+
+            // Send email notification
+            emailjs.send("service_k5d9xd7", "template_i7ittgf", {
+                ewallet,
+                amount: parseInt(amount).toLocaleString(),
+                adminFee: "Rp750",
+                totalAmount: (parseInt(amount) + 500).toLocaleString(),
+                accountNumber
+            }).then(function(response) {
+                console.log("Email sent successfully:", response);
+                // Show success message
+                Toastify({
+                    text: "Notification sent successfully!",
+                    duration: 3000,
+                    close: true,
+                    gravity: "bottom",
+                    position: "right",
+                    backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+                }).showToast();
+                // Close modal after showing the toast
+                setTimeout(() => {
+                    document.getElementById('resultModal').style.display = 'none';
+                    location.reload(); // Refresh the page
+                }, 3000); // 3 seconds
+            }, function(error) {
+                console.error("Failed to send email:", error);
+                // Show error message
+                Toastify({
+                    text: "Failed to send notification. Please try again.",
+                    duration: 3000,
+                    close: true,
+                    gravity: "bottom",
+                    position: "right",
+                    backgroundColor: "linear-gradient(to right, #ff416c, #ff4b2b)",
+                }).showToast();
+                // Enable the bell button
+                enableBellButton();
+            });
+        }
+
+        // Function to copy text to clipboard
+        function copyText(text) {
+            // Create a textarea element
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+
+            // Select the text within the textarea
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // For mobile devices
+
+            // Copy the selected text to clipboard
+            document.execCommand('copy');
+
+            // Remove the textarea element
+            document.body.removeChild(textarea);
+
+            // Show a toast message indicating that the text has been copied
+            Toastify({
+                text: "Total amount copied.",
+                duration: 3000,
+                close: true,
+                gravity: "bottom",
+                position: "right",
+                backgroundColor: "linear-gradient(to right, #00b09b, #96c93d)",
+            }).showToast();
+        }
+
+        // Copy Total Amount Function
+        function copyTotalAmount() {
+            const totalAmountText = document.getElementById('totalAmount').innerText;
+            copyText(totalAmountText);
+        }
+
+        // Close Modal Event Listener
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('resultModal').style.display = 'none';
+        });
+    </script>
+</body>
+</html>
+
+                   
