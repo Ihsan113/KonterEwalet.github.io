@@ -151,9 +151,94 @@
             text-decoration: none;
             cursor: pointer;
         }
+        
+         .loading-overlay {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            transform: translate(-50%, -50%); /* Memindahkan elemen ke tengah */
+            background-color: rgba(0, 0, 0, 0.5); /* Warna hitam dengan opasitas 50% */
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .atom {
+            position: relative;
+            width: 40px;
+            height: 40px;
+        }
+
+        .dot {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            animation: orbit 2s linear infinite, spin 2s linear infinite, pulse 2s ease-in-out infinite;
+        }
+
+        .dot:nth-child(1) {
+            top: calc(50% - 40px);
+            left: calc(50% - 10px);
+            transform-origin: center center;
+            background: radial-gradient(circle, rgba(192, 192, 192, 1) 0%, rgba(211, 211, 211, 1) 50%, rgba(192, 192, 192, 1) 100%);
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.8);
+        }
+
+        .dot:nth-child(2) {
+            top: calc(50% + 20px);
+            left: calc(50% - 10px);
+            transform-origin: center center;
+            background: radial-gradient(circle, rgba(192, 192, 192, 1) 0%, rgba(211, 211, 211, 1) 50%, rgba(192, 192, 192, 1) 100%);
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.8);
+        }
+
+        .dot:nth-child(3) {
+            top: calc(50% - 10px);
+            left: calc(50% - 40px);
+            transform-origin: center center;
+            background: radial-gradient(circle, rgba(192, 192, 192, 1) 0%, rgba(211, 211, 211, 1) 50%, rgba(192, 192, 192, 1) 100%);
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.8);
+        }
+
+        .dot:nth-child(4) {
+            top: calc(50% - 10px);
+            left: calc(50% + 20px);
+            transform-origin: center center;
+            background: radial-gradient(circle, rgba(192, 192, 192, 1) 0%, rgba(211, 211, 211, 1) 50%, rgba(192, 192, 192, 1) 100%);
+            box-shadow: 0 0 20px rgba(192, 192, 192, 0.8);
+        }
+
+        @keyframes orbit {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
     </style>
 </head>
 <body>
+     <div id="loading-overlay" class="loading-overlay">
+    <div class="atom">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+    </div>
+</div>
     <h1>Admin Panel - Orders</h1>
     <div class="order-list" id="orderList">
         <!-- Orders will be populated here -->
@@ -278,6 +363,16 @@
                 modal.style.display = "none";
             }
         });
+        
+        <!-- loading -->
+document.addEventListener("DOMContentLoaded", function() {
+    const loadingOverlay = document.querySelector(".loading-overlay"); // Menggunakan selector yang sesuai
+    loadingOverlay.style.display = "flex"; // Menggunakan display: flex untuk kontainer loading
+
+    setTimeout(function() {
+        loadingOverlay.style.display = "none"; // Sembunyikan overlay setelah 3 detik
+    }, 3000); // Waktu dalam milidetik (3 detik)
+});
     </script>
 </body>
 </html>
